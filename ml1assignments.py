@@ -145,6 +145,6 @@ def zero_one_loss(truth, predictions):
     """Return the fraction of values where truth and prediction do not agree."""
     wrong = 0.0
     for idx in range(len(predictions)):
-        if predictions[idx] == truth[idx]:
+        if predictions[idx] != truth[idx]:
             wrong+= 1
     return wrong/len(predictions)
