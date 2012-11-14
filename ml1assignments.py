@@ -41,6 +41,7 @@ def iris_data(fn):
 
     return X, z
 
+import operator
 
 def knn(X, z, k):
     """Return a function to do k nearest neighbour prediction.
@@ -55,12 +56,50 @@ def knn(X, z, k):
     :param k: Number of neighbours to use.
     """
     def predict(x):
-        # TODO: Calculate the distance of x to every point in the training set
-        # X.
+        """
+        Calculate the distance of x to every point in the training set X.
 
-        # TODO: Pick the k points with the lowest distance.
+        Then pick the k points with the lowest distance.
 
-        # TODO: Do a majority vote and return the class as an integer.
+        Do a majority vote and return the class as an integer.
+        """
+
+        #Result list which assigns each point in x a class by knn
+        class_list = np.array(np.zeros(len(x)))
+        currIdx = 0
+        # Iterate over all points in validation set
+        for pValidate in x:
+            #List for distance from x to all points in X
+            dist_list = []
+            # Iterate over training set
+            for idx in range(len(X)):
+                pTrain = X[idx]
+                # Get distance of validation to training point
+                dist = np.linalg.norm(pValidate-pTrain)
+                # Add distance and point index
+                dist_list.append([dist, idx])
+            # Sort list by distance to get k-nearest
+            dist_list.sort(key=operator.itemgetter(0))
+
+            vote = {}
+            #Do voting over k nearest neighbors
+            for idx in range(min(len(dist_list),k)):
+                dist = dist_list[idx]
+                pointIdx = dist[1]
+                # get class of neighbor point
+                cls = z[pointIdx]
+                #initialize if not yet set
+                currCount = vote.setdefault(cls, 0)
+                #vote for class
+                vote[cls] += 1
+
+            #Get item where vote is maximum
+            maxClass = max(vote.iteritems(), key=operator.itemgetter(1))[0]
+            # Set class for current point
+            class_list[currIdx] = maxClass
+            currIdx += 1
+
+        return class_list
         pass
 
     return predict
@@ -104,5 +143,8 @@ def plot_decision_boundary(ax, predict, x_extent, y_extent):
 
 def zero_one_loss(truth, predictions):
     """Return the fraction of values where truth and prediction do not agree."""
-    # TODO Return the fraction of correct answers.ko
-    pass
+    wrong = 0.0
+    for idx in range(len(predictions)):
+        if predictions[idx] == truth[idx]:
+            wrong+= 1
+    return wrong/len(predictions)
